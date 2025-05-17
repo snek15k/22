@@ -1,0 +1,48 @@
+[
+  {
+    "model": "catalog.category",
+    "pk": 1,
+    "fields": {
+      "name": "Книги",
+      "description": "Художественная и научная литература",
+      "created_at": "2025-05-01T10:00:00Z",
+      "updated_at": "2025-05-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.category",
+    "pk": 2,
+    "fields": {
+      "name": "Электроника",
+      "description": "Гаджеты, техника, аксессуары",
+      "created_at": "2025-05-01T10:00:00Z",
+      "updated_at": "2025-05-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 1,
+    "fields": {
+      "name": "Гарри Поттер",
+      "description": "Книга о приключениях волшебника",
+      "image": "",
+      "category": 1,
+      "purchase_price": "750.00",
+      "created_at": "2025-05-01T11:00:00Z",
+      "updated_at": "2025-05-01T11:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 2,
+    "fields": {
+      "name": "Смартфон",
+      "description": "Мощный телефон с камерой",
+      "image": "",
+      "category": 2,
+      "purchase_price": "25000.00",
+      "created_at": "2025-05-01T11:30:00Z",
+      "updated_at": "2025-05-01T11:30:00Z"
+    }
+  }
+]
