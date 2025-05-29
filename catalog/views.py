@@ -1,21 +1,31 @@
+from django.views.generic import ListView, DetailView, TemplateView, View
 from django.shortcuts import render
-from django.shortcuts import render, get_object_or_404
 from .models import Product
+from blog.models import BlogPost
 
 
-def home_view(request):
-    products = Product.objects.all()
-    return render(request, 'catalog/home.html', {'products': products})
+class HomeView(TemplateView):
+    template_name = 'catalog/home.html'
 
-def contacts_view(request):
-    success = False
-    if request.method == 'POST':
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['products'] = Product.objects.all()
+        context['latest_posts'] = BlogPost.objects.filter(is_published=True).order_by('-created_at')[:3]
+        return context
+
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'catalog/product_detail.html'
+    context_object_name = 'product'
+
+
+class ContactsView(View):
+    template_name = 'catalog/contacts.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {'success': False})
+
+    def post(self, request):
         message = request.POST.get('message')
-
-        success = True
-    return render(request, 'catalog/contacts.html', {'success': success})
-
-
-def product_detail_view(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    return render(request, 'catalog/product_detail.html', {'product': product})
+        return render(request, self.template_name, {'success': True})
