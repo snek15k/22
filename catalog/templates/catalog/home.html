@@ -6,6 +6,12 @@
     <h1 class="text-primary mb-4">Добро пожаловать!</h1>
     <p class="mb-5">Это домашняя страница приложения. Ниже представлен список товаров.</p>
 
+    <div class="mb-4 text-end">
+        <a href="{% url 'product_create' %}" class="btn btn-success">
+            + Добавить товар
+        </a>
+    </div>
+
     <!-- Список товаров -->
     <div class="row">
         {% for product in products %}
