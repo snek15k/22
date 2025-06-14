@@ -14,6 +14,14 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+
+from .services import get_products_by_category
+from .models import Product
+
+from django.core.cache import cache
+
 
 class HomeView(TemplateView):
     template_name = 'catalog/home.html'
@@ -24,7 +32,7 @@ class HomeView(TemplateView):
         context['latest_posts'] = BlogPost.objects.filter(is_published=True).order_by('-created_at')[:3]
         return context
 
-
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class ProductDetailView(DetailView):
     model = Product
     template_name = 'catalog/product_detail.html'
@@ -58,7 +66,10 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        cache_key = f'products_in_category_{form.instance.category_id}'
+        cache.delete(cache_key)
+        return response
 
 
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
@@ -72,6 +83,12 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
         if obj.owner != request.user:
             return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        cache_key = f'products_in_category_{form.instance.category_id}'
+        cache.delete(cache_key)
+        return response
 
 
 class ProductDeleteView(LoginRequiredMixin, DeleteView):
@@ -88,14 +105,37 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
             return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
 
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        cache_key = f'products_in_category_{self.object.category_id}'
+        cache.delete(cache_key)
+        return super().delete(request, *args, **kwargs)
+
 
 class ProductUnpublishView(PermissionRequiredMixin, View):
     permission_required = 'catalog.can_unpublish_product'
-    raise_exception = True  # чтобы 403 выдавать, если нет прав
+    raise_exception = True
 
     def post(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         product.status = Product.STATUS_DRAFT
         product.save()
+        cache_key = f'products_in_category_{product.category_id}'
+        cache.delete(cache_key)
         messages.success(request, f'Продукт "{product.name}" снят с публикации.')
         return redirect(reverse_lazy('product_detail', kwargs={'pk': pk}))
+
+
+class CategoryProductListView(ListView):
+    model = Product
+    template_name = 'catalog/products_by_category.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        category_id = self.kwargs['category_id']
+        return get_products_by_category(category_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category_id'] = self.kwargs['category_id']
+        return context

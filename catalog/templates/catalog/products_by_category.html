@@ -1,0 +1,28 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}Продукты категории {{ category_id }}{% endblock %}
+
+{% block content %}
+    <h1>Продукты в категории №{{ category_id }}</h1>
+
+    {% if products %}
+        <div class="row">
+            {% for product in products %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                            <a href="{% url 'product_detail' product.pk %}" class="btn btn-primary">Подробнее</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Нет продуктов в этой категории.</p>
+    {% endif %}
+{% endblock %}
