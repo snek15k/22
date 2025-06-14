@@ -1,0 +1,38 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">{{ product.name }}</h1>
+    <div class="row">
+        <div class="col-md-6">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+            {% else %}
+                <p class="text-muted">Изображение отсутствует</p>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <p><strong>Описание:</strong></p>
+            <p>{{ product.description|default:"Описание отсутствует." }}</p>
+            <p><strong>Категория:</strong> {{ product.category.name }}</p>
+            <p><strong>Цена за покупку:</strong> {{ product.purchase_price }} ₽</p>
+            <p><strong>Создан:</strong> {{ product.created_at|date:"d.m.Y H:i" }}</p>
+            <p><strong>Обновлён:</strong> {{ product.updated_at|date:"d.m.Y H:i" }}</p>
+        </div>
+    </div>
+
+    {% if perms.catalog.can_unpublish_product %}
+    <form action="{% url 'product_unpublish' product.pk %}" method="post" class="mt-3">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-warning">Снять с публикации</button>
+    </form>
+{% endif %}
+
+{% if perms.catalog.delete_product %}
+    <a href="{% url 'product_delete' product.pk %}" class="btn btn-danger mt-3">Удалить продукт</a>
+{% endif %}
+
+
+    <a href="{% url 'home' %}" class="btn btn-primary mt-4">← Назад на главную</a>
+{% endblock %}

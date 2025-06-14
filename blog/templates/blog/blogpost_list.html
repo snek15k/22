@@ -1,0 +1,14 @@
+{% extends 'catalog/base.html' %}
+
+{% block content %}
+  <h1>Блог</h1>
+  <a href="{% url 'blog:create' %}">Создать новую запись</a>
+  <ul>
+    {% for post in posts %}
+      <li>
+        <a href="{% url 'blog:detail' post.pk %}">{{ post.title }}</a>
+        {% if post.is_published %}<span>✔</span>{% else %}<span>❌</span>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
